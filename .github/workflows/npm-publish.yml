@@ -1,33 +1,26 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
-
-name: Node.js Package
+name: Deploy GPK Hub to GitHub Pages
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [main]
+  # Optional: Uncomment if you want manual deploys
+  # workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm test
-
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Verify files
+        run: |
+          ls -la  # Debug: Show files being deployed
+          [ -f index.html ] || exit 1  # Ensure index exists
+          
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v3
