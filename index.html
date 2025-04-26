@@ -24,6 +24,9 @@
             background-color: var(--gpk-paper);
             color: var(--gpk-black);
             overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         /* Retro GPK Header */
@@ -54,6 +57,7 @@
             gap: 2rem;
             padding: 2rem;
             perspective: 1000px;
+            flex: 1;
         }
         
         .card-container {
@@ -177,8 +181,74 @@
             align-items: center;
             font-size: 0.8rem;
         }
+        
+        /* Footer Styles */
+        footer {
+            background: var(--gpk-black);
+            color: white;
+            padding: 2rem;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-section h3 {
+            color: var(--gpk-yellow);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: var(--gpk-red);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--gpk-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -199,10 +269,59 @@
         <canvas id="webgl-canvas"></canvas>
     </div>
     
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About GPK ULTRA</h3>
+                <p>The ultimate destination for Garbage Pail Kids collectors. Buy, sell, trade, and showcase your collection with fellow enthusiasts.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Instagram">📸</a>
+                    <a href="#" aria-label="Facebook">👍</a>
+                    <a href="#" aria-label="Twitter">🐦</a>
+                    <a href="#" aria-label="YouTube">▶️</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Browse Cards</a></li>
+                    <li><a href="#">New Releases</a></li>
+                    <li><a href="#">Rare Finds</a></li>
+                    <li><a href="#">Collection Tracker</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Shipping Policy</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <ul>
+                    <li>Email: collect@gpkultra.com</li>
+                    <li>Phone: (555) GPK-ULTRA</li>
+                    <li>PO Box 1234</li>
+                    <li>Topps Town, NY 10001</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>&copy; 2023 GPK ULTRA Collector's Hub. All rights reserved. Garbage Pail Kids is a trademark of The Topps Company.</p>
+        </div>
+    </footer>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
     <script>
-        // Sample GPK Card Data
+        // Extended GPK Card Data (10 classic cards)
         const gpkCards = [
             {
                 id: 1,
@@ -224,7 +343,86 @@
                 value: 85.50,
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
-            // Add more cards as needed
+            {
+                id: 3,
+                title: "CRYING RYAN",
+                series: 2,
+                number: "3a",
+                year: 1985,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 65.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 4,
+                title: "DEAD TED",
+                series: 2,
+                number: "4a",
+                year: 1985,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 150.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 5,
+                title: "FAT MATT",
+                series: 3,
+                number: "5a",
+                year: 1986,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 75.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 6,
+                title: "GORY LORI",
+                series: 3,
+                number: "6a",
+                year: 1986,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 95.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 7,
+                title: "JAWED JIM",
+                series: 4,
+                number: "7a",
+                year: 1986,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 110.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 8,
+                title: "KILLER KYLE",
+                series: 4,
+                number: "8a",
+                year: 1986,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 80.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 9,
+                title: "LOUSY LARRY",
+                series: 5,
+                number: "9a",
+                year: 1986,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 70.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            },
+            {
+                id: 10,
+                title: "NASTY NICK",
+                series: 5,
+                number: "10a",
+                year: 1986,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
+                value: 90.00,
+                backImage: "https://i.imgur.com/5X5w0Wq.png"
+            }
         ];
         
         // DOM Elements
