@@ -1,3 +1,77 @@
+// Import components
+import { initCardViewer } from './card-viewer.js';
+import { initBookViewer } from './book-viewer.js';
+
+// Card Data
+export const gpkCards = [
+    {
+        id: 1,
+        title: "ADAM BOMB",
+        series: 1,
+        number: "1a",
+        year: 1985,
+        imageUrl: "assets/cards/adam_bomb.jpg",
+        backImage: "assets/cards/back_design.png",
+        value: 125.00
+    },
+    // Add all other cards...
+];
+
+// Set Data
+export const gpkSets = [
+    {
+        id: "series1",
+        title: "Original Series 1",
+        year: 1985,
+        coverImage: "assets/sets/series1_cover.jpg",
+        pages: [
+            "assets/sets/series1/page1.jpg",
+            "assets/sets/series1/page2.jpg"
+            // Add all pages
+        ]
+    },
+    // Add all other sets...
+];
+
+// Initialize the app
+function init() {
+    // Setup tab switching
+    const tabs = document.querySelectorAll('.nav-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active class from all tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tab.classList.add('active');
+            document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+        });
+    });
+
+    // Initialize viewers
+    initCardViewer(gpkCards);
+    initBookViewer(gpkSets);
+
+    // Cart functionality
+    let cartItems = 0;
+    const cartCount = document.querySelector('.cart-count');
+    
+    document.querySelectorAll('.card-container').forEach(card => {
+        card.addEventListener('click', () => {
+            // Add to cart logic
+            cartItems++;
+            cartCount.textContent = cartItems;
+        });
+    });
+}
+
+// Start the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', init);
+
+
 // Replace your existing initCardGrid() function with:
 function initCardGrid() {
   const observer = new IntersectionObserver((entries) => {
@@ -54,3 +128,369 @@ function initWebGLViewer(card) {
   
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); // Better quality with less performance cost
 }
+
+import { gpkCards } from './app.js';
+
+export function initCardViewer(cards) {
+    const cardGrid = document.getElementById('cardGrid');
+    const webglContainer = document.getElementById('webgl-container');
+    const webglClose = document.getElementById('webgl-close');
+    
+    // Create card grid
+    cards.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card-container';
+        cardElement.innerHTML = `
+            <div class="card-face front">
+                <img data-src="${card.imageUrl}" alt="${card.title}" class="card-image">
+            </div>
+            <div class="card-face back">
+                <img src="${card.backImage}" alt="Card back" class="card-image">
+            </div>
+        `;
+        cardGrid.appendChild(cardElement);
+        
+        // Add click handler for 3D viewer
+        cardElement.addEventListener('click', () => {
+            showCardIn3D(card);
+        });
+    });
+
+    // 3D Card Viewer Functionality
+    let scene, camera, renderer, cardMesh;
+    
+    function showCardIn3D(card) {
+        webglContainer.style.display = 'flex';
+        
+        // Setup Three.js scene
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('webgl-canvas'),
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        
+        // Create card
+        const texture = new THREE.TextureLoader().load(card.imageUrl);
+        const geometry = new THREE.PlaneGeometry(3, 4);
+        const material = new THREE.MeshStandardMaterial({
+            map: texture,
+            roughness: 0.3,
+            metalness: 0.1
+        });
+        
+        cardMesh = new THREE.Mesh(geometry, material);
+        scene.add(cardMesh);
+        
+        camera.position.z = 5;
+        
+        // Controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = true;
+        controls.enablePan = false;
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        // Handle resize
+        window.addEventListener('resize', onWindowResize);
+    }
+    
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // Close viewer
+    webglClose.addEventListener('click', () => {
+        webglContainer.style.display = 'none';
+        window.removeEventListener('resize', onWindowResize);
+    });
+}
+
+import { gpkSets } from './app.js';
+
+export function initBookViewer(sets) {
+    const setsGrid = document.getElementById('setsGrid');
+    const bookContainer = document.getElementById('book-container');
+    const bookClose = document.getElementById('book-close');
+    
+    // Create sets grid
+    sets.forEach(set => {
+        const setElement = document.createElement('div');
+        setElement.className = 'set-container';
+        setElement.innerHTML = `
+            <img src="${set.coverImage}" alt="${set.title}" class="set-cover">
+            <h3>${set.title} (${set.year})</h3>
+        `;
+        setsGrid.appendChild(setElement);
+        
+        // Add click handler for book viewer
+        setElement.addEventListener('click', () => {
+            showBookIn3D(set);
+        });
+    });
+
+    // 3D Book Viewer Functionality
+    let bookScene, bookCamera, bookRenderer, bookControls;
+    let currentPage = 0;
+    let pageMeshes = [];
+    
+    function showBookIn3D(set) {
+        bookContainer.style.display = 'flex';
+        
+        // Setup Three.js scene
+        bookScene = new THREE.Scene();
+        bookCamera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        bookRenderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('book-canvas'),
+            antialias: true
+        });
+        bookRenderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        bookScene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        bookScene.add(directionalLight);
+        
+        // Load first page
+        loadPage(set.pages[0]);
+        
+        bookCamera.position.z = 8;
+        
+        // Controls
+        bookControls = new THREE.OrbitControls(bookCamera, bookRenderer.domElement);
+        bookControls.enableZoom = true;
+        bookControls.enablePan = false;
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            bookControls.update();
+            bookRenderer.render(bookScene, bookCamera);
+        }
+        animate();
+        
+        // Keyboard navigation
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('resize', onWindowResize);
+    }
+    
+    function loadPage(pageUrl) {
+        // Clear previous pages
+        pageMeshes.forEach(mesh => bookScene.remove(mesh));
+        pageMeshes = [];
+        
+        // Load new page
+        const texture = new THREE.TextureLoader().load(pageUrl);
+        const geometry = new THREE.PlaneGeometry(6, 8);
+        const material = new THREE.MeshStandardMaterial({
+            map: texture,
+            side: THREE.DoubleSide
+        });
+        
+        const pageMesh = new THREE.Mesh(geometry, material);
+        bookScene.add(pageMesh);
+        pageMeshes.push(pageMesh);
+    }
+    
+    function onKeyDown(event) {
+        if (event.key === 'ArrowRight') {
+            // Next page logic
+        } else if (event.key === 'ArrowLeft') {
+            // Previous page logic
+        }
+    }
+    
+    function onWindowResize() {
+        bookCamera.aspect = window.innerWidth / window.innerHeight;
+        bookCamera.updateProjectionMatrix();
+        bookRenderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // Close viewer
+    bookClose.addEventListener('click', () => {
+        bookContainer.style.display = 'none';
+        window.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('resize', onWindowResize);
+    });
+}
+
+// In book-viewer.js - Add to showBookIn3D() function
+
+let currentSet = null; // Track current set being viewed
+
+function showBookIn3D(set) {
+    currentSet = set;
+    currentPage = 0;
+    // ... existing setup code ...
+
+    // Load first two pages (left and right)
+    loadSpread(currentPage);
+}
+
+function loadSpread(pageIndex) {
+    // Clear previous pages
+    pageMeshes.forEach(mesh => bookScene.remove(mesh));
+    pageMeshes = [];
+
+    // Load left page (even index)
+    if (pageIndex > 0) {
+        loadPage(currentSet.pages[pageIndex - 1], true); // Left page
+    }
+
+    // Load right page (odd index)
+    if (pageIndex < currentSet.pages.length) {
+        loadPage(currentSet.pages[pageIndex], false); // Right page
+    }
+}
+
+function loadPage(pageUrl, isLeftPage) {
+    const texture = new THREE.TextureLoader().load(pageUrl);
+    const geometry = new THREE.PlaneGeometry(6, 8);
+    const material = new THREE.MeshStandardMaterial({
+        map: texture,
+        side: THREE.DoubleSide
+    });
+
+    const pageMesh = new THREE.Mesh(geometry, material);
+    pageMesh.position.x = isLeftPage ? -3.2 : 3.2;
+    pageMesh.rotation.y = isLeftPage ? Math.PI/2 : -Math.PI/2;
+    
+    bookScene.add(pageMesh);
+    pageMeshes.push(pageMesh);
+}
+
+function onKeyDown(event) {
+    if (event.key === 'ArrowRight' && currentPage < currentSet.pages.length - 1) {
+        currentPage++;
+        loadSpread(currentPage);
+    } 
+    else if (event.key === 'ArrowLeft' && currentPage > 0) {
+        currentPage--;
+        loadSpread(currentPage);
+    }
+}
+
+// In app.js - Add to init() function
+
+function initLazyLoading() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                observer.unobserve(img);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('[data-src]').forEach(img => {
+        observer.observe(img);
+    });
+}
+
+// Add to both viewer files
+
+function showLoader() {
+    const loader = document.createElement('div');
+    loader.className = 'viewer-loader';
+    loader.innerHTML = `
+        <div class="loader-spinner"></div>
+        <p>LOADING GROSSNESS...</p>
+    `;
+    document.getElementById('webgl-container').appendChild(loader);
+    return loader;
+}
+
+function hideLoader(loader) {
+    if (loader && loader.parentNode) {
+        loader.parentNode.removeChild(loader);
+    }
+}
+
+// In card-viewer.js - Add after OrbitControls initialization
+
+controls.enableTouch = true;
+controls.touchSensitivity = 2;
+
+// In book-viewer.js - Add swipe detection
+let touchStartX = 0;
+
+bookRenderer.domElement.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+}, false);
+
+bookRenderer.domElement.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+    
+    if (Math.abs(diffX) > 50) { // Minimum swipe distance
+        if (diffX > 0 && currentPage < currentSet.pages.length - 1) {
+            // Swipe left - next page
+            currentPage++;
+        } else if (diffX < 0 && currentPage > 0) {
+            // Swipe right - previous page
+            currentPage--;
+        }
+        loadSpread(currentPage);
+    }
+}, false);
+
+// Add to all Three.js texture loading
+
+const texture = new THREE.TextureLoader().load(
+    imageUrl,
+    (texture) => { /* success */ },
+    undefined, // progress callback (optional)
+    (error) => {
+        console.error('Error loading texture:', error);
+        // Show error image
+        errorTexture = new THREE.TextureLoader().load('assets/error.jpg');
+        material.map = errorTexture;
+    }
+);
+
+// Add cleanup functions to both viewers
+
+function cleanup() {
+    // Dispose of Three.js resources
+    if (renderer) {
+        renderer.dispose();
+        renderer.forceContextLoss();
+    }
+    if (controls) controls.dispose();
+    scene.traverse(child => {
+        if (child.material) {
+            child.material.dispose();
+        }
+        if (child.geometry) {
+            child.geometry.dispose();
+        }
+    });
+}
+
+// Call when closing viewers
+closeButton.addEventListener('click', () => {
+    cleanup();
+    viewer.style.display = 'none';
+});
+
