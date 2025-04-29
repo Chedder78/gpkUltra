@@ -329,8 +329,8 @@
                 series: 1,
                 number: "",
                 year: 1985,
-                imageUrl: "OS1_customWrapper.png",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 125.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -339,8 +339,8 @@
                 series: 2,
                 number: "",
                 year: 1985,
-                imageUrl: "os2_custom_wrapper.jpg",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 85.50, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -349,8 +349,8 @@
                 series: 3,
                 number: "",
                 year: 1986,
-                imageUrl: "os3_custom_wrapper.jpg",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 65.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -359,8 +359,8 @@
                 series: 4,
                 number: "",
                 year: 1986,
-                imageUrl: "os4_custom_wrapper.jpg",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 150.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -369,8 +369,8 @@
                 series: 5,
                 number: "",
                 year: 1986,
-                imageUrl: "os5_custom_wrapper.jpg",
-                value:,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 75.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -379,8 +379,8 @@
                 series: 6,
                 number: "",
                 year: 1986,
-                imageUrl: "OS6_customWrapper.png",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 95.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -389,8 +389,8 @@
                 series: 7,
                 number: "",
                 year: 1986,
-                imageUrl: "OS7_customWrapper.png",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 110.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -400,7 +400,7 @@
                 number: "",
                 year: 1987,
                 imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: ,
+                value: 80.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -409,8 +409,8 @@
                 series: 9,
                 number: "",
                 year: 1987,
-                imageUrl: "Series9_customWrapper.png",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 70.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             },
             {
@@ -419,8 +419,8 @@
                 series: 10,
                 number: "",
                 year: 1987,
-                imageUrl: "Os10_custom_wrapper.png",
-                value: ,
+                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg", // Changed to full URL
+                value: 90.00, // Added value
                 backImage: "https://i.imgur.com/5X5w0Wq.png"
             }
         ];
@@ -475,7 +475,11 @@
             // Set up Three.js scene
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas'), antialias: true });
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('webgl-canvas'), 
+                antialias: true,
+                preserveDrawingBuffer: true // Helps with texture loading
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
             
             // Add lights
@@ -488,15 +492,43 @@
             
             // Create card geometry
             const geometry = new THREE.PlaneGeometry(3, 4);
-            const texture = new THREE.TextureLoader().load(card.imageUrl);
-            const material = new THREE.MeshStandardMaterial({
-                map: texture,
-                roughness: 0.3,
-                metalness: 0.1
-            });
             
-            cardMesh = new THREE.Mesh(geometry, material);
-            scene.add(cardMesh);
+            // Load texture with error handling
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(
+                card.imageUrl,
+                (texture) => {
+                    const material = new THREE.MeshStandardMaterial({
+                        map: texture,
+                        roughness: 0.3,
+                        metalness: 0.1
+                    });
+                    
+                    if (cardMesh) {
+                        scene.remove(cardMesh);
+                    }
+                    
+                    cardMesh = new THREE.Mesh(geometry, material);
+                    scene.add(cardMesh);
+                },
+                undefined, // Progress callback (optional)
+                (error) => {
+                    console.error('Error loading texture:', error);
+                    // Fallback to a default material if texture fails to load
+                    const material = new THREE.MeshStandardMaterial({
+                        color: 0xffffff,
+                        roughness: 0.3,
+                        metalness: 0.1
+                    });
+                    
+                    if (cardMesh) {
+                        scene.remove(cardMesh);
+                    }
+                    
+                    cardMesh = new THREE.Mesh(geometry, material);
+                    scene.add(cardMesh);
+                }
+            );
             
             camera.position.z = 5;
             
@@ -515,295 +547,22 @@
             animate();
             
             // Handle window resize
-            window.addEventListener('resize', () => {
+            function handleResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        }
-        
-        // Close WebGL Viewer
-        webglClose.addEventListener('click', () => {
-            webglContainer.style.display = 'none';
-            // Clean up Three.js
-            if(renderer) {
-                renderer.dispose();
-            }
-        });
-        
-        // Initialize cart counter
-        let cartItems = 0;
-        
-        // Sample add to cart functionality
-        function addToCart(cardId) {
-            cartItems++;
-            cartCount.textContent = cartItems;
-            // Add actual cart logic here
-        }
-        
-        // Initialize the app
-        initCardGrid();
-    </script>
-</body>
-</html
-        
-        
-    <div id="webgl-container">
-        <button id="webgl-close">X CLOSE</button>
-        <canvas id="webgl-canvas"></canvas>
-    </div>
-    
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>About GPK ULTRA</h3>
-                <p>The ultimate destination for Garbage Pail Kids collectors. Buy, sell, trade, and showcase your collection with fellow enthusiasts.</p>
-                <div class="social-links">
-                    <a href="#" aria-label="Instagram">📸</a>
-                    <a href="#" aria-label="Facebook">👍</a>
-                    <a href="#" aria-label="Twitter">🐦</a>
-                    <a href="#" aria-label="YouTube">▶️</a>
-                </div>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="#">Browse Cards</a></li>
-                    <li><a href="#">New Releases</a></li>
-                    <li><a href="#">Rare Finds</a></li>
-                    <li><a href="#">Collection Tracker</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Legal</h3>
-                <ul>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Shipping Policy</a></li>
-                    <li><a href="#">Returns</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <ul>
-                    <li>Email: collect@gpkultra.com</li>
-                    <li>Phone: (555) GPK-ULTRA</li>
-                    <li>PO Box 1234</li>
-                    <li>Topps Town, NY 10001</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="copyright">
-            <p>&copy; 2023 GPK ULTRA Collector's Hub. All rights reserved. Garbage Pail Kids is a trademark of The Topps Company.</p>
-        </div>
-    </footer>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
-    <script>
-        // Extended GPK Card Data (10 classic cards)
-        const gpkCards = [
-            {
-                id: 1,
-                title: "ADAM BOMB",
-                series: 1,
-                number: "1a",
-                year: 1985,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 125.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 2,
-                title: "BAD BREATH",
-                series: 1,
-                number: "2a",
-                year: 1985,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 85.50,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 3,
-                title: "CRYING RYAN",
-                series: 2,
-                number: "3a",
-                year: 1985,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 65.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 4,
-                title: "DEAD TED",
-                series: 2,
-                number: "4a",
-                year: 1985,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 150.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 5,
-                title: "FAT MATT",
-                series: 3,
-                number: "5a",
-                year: 1986,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 75.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 6,
-                title: "GORY LORI",
-                series: 3,
-                number: "6a",
-                year: 1986,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 95.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 7,
-                title: "JAWED JIM",
-                series: 4,
-                number: "7a",
-                year: 1986,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 110.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 8,
-                title: "KILLER KYLE",
-                series: 4,
-                number: "8a",
-                year: 1986,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 80.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 9,
-                title: "LOUSY LARRY",
-                series: 5,
-                number: "9a",
-                year: 1986,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 70.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 10,
-                title: "NASTY NICK",
-                series: 5,
-                number: "10a",
-                year: 1986,
-                imageUrl: "https://i.imgur.com/JQ9w0Wq.jpg",
-                value: 90.00,
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            }
-        ];
-        
-        // DOM Elements
-        const cardGrid = document.getElementById('cardGrid');
-        const webglContainer = document.getElementById('webgl-container');
-        const webglClose = document.getElementById('webgl-close');
-        const cartCount = document.querySelector('.cart-count');
-        
-        // Three.js Variables
-        let scene, camera, renderer, cardMesh;
-        
-        // Initialize the card grid
-        function initCardGrid() {
-            cardGrid.innerHTML = '';
-            
-            gpkCards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card-container';
-                cardElement.innerHTML = `
-                    <div class="card-face card-front">
-                        <div class="card-image" style="background-image: url('${card.imageUrl}')"></div>
-                        <div class="card-info">
-                            <h3 class="card-title">${card.title}</h3>
-                            <p>Series ${card.series} • ${card.number} • $${card.value.toFixed(2)}</p>
-                        </div>
-                    </div>
-                    <div class="card-face card-back">
-                        <div class="card-image" style="background-image: url('${card.backImage}')"></div>
-                    </div>
-                `;
-                
-                cardElement.addEventListener('click', () => {
-                    cardElement.classList.toggle('flipped');
-                    // Open WebGL viewer on double click
-                    setTimeout(() => {
-                        if(cardElement.classList.contains('flipped')) {
-                            initWebGLViewer(card);
-                        }
-                    }, 400);
-                });
-                
-                cardGrid.appendChild(cardElement);
-            });
-        }
-        
-        // Initialize WebGL Viewer
-        function initWebGLViewer(card) {
-            webglContainer.style.display = 'flex';
-            
-            // Set up Three.js scene
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas'), antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            
-            // Add lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(1, 1, 1);
-            scene.add(directionalLight);
-            
-            // Create card geometry
-            const geometry = new THREE.PlaneGeometry(3, 4);
-            const texture = new THREE.TextureLoader().load(card.imageUrl);
-            const material = new THREE.MeshStandardMaterial({
-                map: texture,
-                roughness: 0.3,
-                metalness: 0.1
-            });
-            
-            cardMesh = new THREE.Mesh(geometry, material);
-            scene.add(cardMesh);
-            
-            camera.position.z = 5;
-            
-            // Add controls
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableZoom = true;
-            controls.enablePan = false;
-            
-            // Animation loop
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
             }
             
-            animate();
+            window.addEventListener('resize', handleResize);
             
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
+            // Clean up event listener when viewer is closed
+            webglClose.addEventListener('click', () => {
+                window.removeEventListener('resize', handleResize);
+                webglContainer.style.display = 'none';
+                if(renderer) {
+                    renderer.dispose();
+                }
+            }, { once: true });
         }
         
         // Close WebGL Viewer
