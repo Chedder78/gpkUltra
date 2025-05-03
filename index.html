@@ -521,7 +521,26 @@
                     scene.add(cardMesh);
                 }
             );
-            
+            function AnimatedCardPortal({ card }) {
+  const [expanded, setExpanded] = useState(false);
+  const ref = useRef();
+  
+  useSpring({
+    scale: expanded ? [window.innerWidth, window.innerHeight, 1] : [150, 200, 1],
+    position: expanded ? [0, 0, 0] : [card.position.x, card.position.y, 0],
+    onRest: () => expanded && setViewMode('3d')
+  });
+  
+  return (
+    <animated.mesh
+      ref={ref}
+      onClick={() => setExpanded(true)}
+    >
+      <planeGeometry />
+      <meshBasicMaterial map={textureLoader.load(card.imageUrl)} />
+    </animated.mesh>
+  );
+        }
             camera.position.z = 5;
             
             // Add controls
