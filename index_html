@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPK ULTRA | Collector's Hub</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">GPK ULTRA</div>
+        <nav class="nav-tabs">
+            <div class="nav-tab active" data-tab="cards">Individual Cards</div>
+            <div class="nav-tab" data-tab="sets">Full Sets</div>
+        </nav>
+    </header>
+
+    <main>
+        <div id="cards-tab" class="tab-content active">
+            <div class="card-grid" id="cardGrid">
+                <!-- Cards will be injected via JavaScript -->
+            </div>
+        </div>
+
+        <div id="sets-tab" class="tab-content">
+            <div class="sets-grid" id="setsGrid">
+                <!-- Sets will be injected via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <div class="cart-button">
+        🛒
+        <span class="cart-count">0</span>
+    </div>
+
+    <!-- 3D Card Viewer -->
+    <div id="webgl-container" class="viewer">
+        <div id="webgl-instructions" class="viewer-instructions">
+            🖱️ DRAG to rotate • 🖲️ SCROLL to zoom
+        </div>
+        <button class="viewer-close">X CLOSE</button>
+        <canvas id="webgl-canvas"></canvas>
+    </div>
+
+    <!-- 3D Book Viewer -->
+    <div id="book-container" class="viewer">
+        <div id="book-instructions" class="viewer-instructions">
+            ← → ARROWS to turn pages • SCROLL to zoom
+        </div>
+        <button class="viewer-close">X CLOSE</button>
+        <canvas id="book-canvas"></canvas>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About GPK ULTRA</h3>
+                <p>The ultimate destination for Garbage Pail Kids collectors.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Instagram">📸</a>
+                    <a href="#" aria-label="Facebook">👍</a>
+                    <a href="#" aria-label="Twitter">🐦</a>
+                    <a href="#" aria-label="YouTube">▶️</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">Browse Cards</a></li>
+                    <li><a href="#">New Releases</a></li>
+                    <li><a href="#">Rare Finds</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Shipping Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>&copy; 2023 GPK ULTRA Collector's Hub. Garbage Pail Kids is a trademark of The Topps Company.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="js/app.js" type="module"></script>
+    <script src="js/card-viewer.js" type="module"></script>
+    <script src="js/book-viewer.js" type="module"></script>
+</body>
+</html>
