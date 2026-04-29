@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GPK AR/VR Gallery</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #root { width: 100vw; height: 100vh; }
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+    }
+    .controls button {
+      padding: 10px 15px;
+      background: #333;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    .controls button.active {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Load required libraries -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/three@0.132.2/build/three.min.js"></script>
+  <script src="https://unpkg.com/@react-three/fiber@7.0.26/dist/react-three-fiber.js"></script>
+  <script src="https://unpkg.com/@react-three/drei@9.0.0/dist/drei.umd.js"></script>
+  <script src="https://unpkg.com/@react-three/xr@3.0.0/dist/xr.umd.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+    const { Canvas, useThree } = ReactThreeFiber;
+    const { OrbitControls, ARButton, VRButton, XR } = ReactThreeDrei;
+    
+    function VideoCard({ videoUrl, position = [0, 0, 0] }) {
+      const videoRef = React.useRef(document.createElement('video'));
+      
+      React.useEffect(() => {
+        const video = videoRef.current;
+        video.src = videoUrl;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.play().catch(e => console.log("Autoplay prevented:", e));
+        
+        return () => {
+          video.pause();
+          video.removeAttribute('src');
+        };
+      }, [videoUrl]);
+      
+      return (
+        <mesh position={position}>
+          <planeGeometry args={[3, 4]} />
+          <meshBasicMaterial>
+            <videoTexture attach="map" args={[videoRef.current]} />
+          </meshBasicMaterial>
+        </mesh>
+      );
+    }
+    
+    function VideoCards({ mode }) {
+      const [cards] = useState([
+        {
+          id: 1,
+          videoUrl: '71730abc-b3d7-45c6-a6ca-7c2278a97238.mp4',
+          position: [0, 0, 0],
+          title: 'GPK ULTRA 3D'
+        },
+        {
+          id: 2,
+          videoUrl: '7b556f3c-2624-4413-8dcf-7e279583a7f4.mp4',
+          position: [4, 0, -2],
+          title: 'GPK ULTRA 3D'
+        }
+      ]);
+      
+      const getCardPosition = (card, index) => {
+        if (mode === 'vr') return [index * 2 - (cards.length - 1), 1.5, -3];
+        if (mode === 'ar') return [0, 0, -0.5];
+        return card.position;
+      };
+      
+      return cards.map((card, index) => (
+        <VideoCard 
+          key={card.id}
+          videoUrl={card.videoUrl}
+          position={getCardPosition(card, index)}
+        />
+      ));
+    }
+    
+    function GalleryControls() {
+      const [mode, setMode] = useState('desktop');
+      
+      return (
+        <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+          <div className="controls">
+            <button 
+              onClick={() => setMode('desktop')}
+              className={mode === 'desktop' ? 'active' : ''}
+            >
+              Desktop View
+            </button>
+            <ARButton 
+              onClick={() => setMode('ar')}
+              sessionInit={{ 
+                requiredFeatures: ['hit-test'],
+                optionalFeatures: ['dom-overlay'],
+                domOverlay: { root: document.body }
+              }}
+              className={mode === 'ar' ? 'active' : ''}
+            />
+            <VRButton 
+              onClick={() => setMode('vr')}
+              className={mode === 'vr' ? 'active' : ''}
+            />
+          </div>
+          
+          <Canvas>
+            <XR>
+              {mode === 'desktop' && <OrbitControls />}
+              <ambientLight intensity={0.5} />
+              <VideoCards mode={mode} />
+            </XR>
+          </Canvas>
+        </div>
+      );
+    }
+    
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<GalleryControls />);
+  </script>
+</body>
+</html>
