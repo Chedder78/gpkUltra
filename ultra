@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPK ULTRA | Collector's Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --gpk-red: #ff3e41;
@@ -12,14 +13,14 @@
             --gpk-black: #1a1a1a;
             --gpk-paper: #f5f5f0;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Bangers', cursive, sans-serif;
         }
-        
+
         body {
             background-color: var(--gpk-paper);
             color: var(--gpk-black);
@@ -28,8 +29,8 @@
             display: flex;
             flex-direction: column;
         }
-        
-        /* Retro GPK Header */
+
+        /* Header */
         header {
             background: linear-gradient(135deg, var(--gpk-red), var(--gpk-yellow));
             padding: 1rem;
@@ -39,7 +40,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             border-bottom: 4px solid var(--gpk-black);
         }
-        
+
         .logo {
             font-size: 3rem;
             text-align: center;
@@ -49,9 +50,53 @@
                          -1px 1px 0 #fff;
             letter-spacing: 2px;
         }
-        
-        /* 3D Card Grid */
-        .card-grid {
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: var(--gpk-black);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1.5rem;
+            background: var(--gpk-blue);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .nav-tab.active {
+            background: var(--gpk-red);
+            border-color: var(--gpk-yellow);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Card Grid */
+        .card-grid, .sets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 2rem;
@@ -59,19 +104,19 @@
             perspective: 1000px;
             flex: 1;
         }
-        
+
         .card-container {
             position: relative;
             height: 380px;
             transform-style: preserve-3d;
-            transition: transform 0.8s;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: pointer;
         }
-        
+
         .card-container.flipped {
             transform: rotateY(180deg);
         }
-        
+
         .card-face {
             position: absolute;
             width: 100%;
@@ -82,14 +127,14 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             border: 4px solid var(--gpk-black);
         }
-        
+
         .card-front {
             background: white;
             display: flex;
             flex-direction: column;
             transform: rotateY(0deg);
         }
-        
+
         .card-back {
             background: repeating-linear-gradient(
                 45deg,
@@ -103,54 +148,132 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .card-image {
             flex: 1;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
         }
-        
+
         .card-info {
             padding: 1rem;
             background: white;
             border-top: 3px solid var(--gpk-black);
         }
-        
+
         .card-title {
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
             color: var(--gpk-red);
+            letter-spacing: 1px;
         }
-        
-        /* WebGL Card Viewer Container */
-        #webgl-container {
+
+        /* Sets Grid */
+        .set-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .set-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+
+        .set-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .set-container:hover .set-cover {
+            transform: scale(1.05);
+        }
+
+        /* Viewers */
+        .viewer {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
         }
-        
-        #webgl-close {
+
+        .viewer.active {
+            display: flex;
+        }
+
+        .viewer-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 25px;
+            right: 25px;
             background: var(--gpk-red);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             font-size: 1.2rem;
             cursor: pointer;
             border-radius: 4px;
+            z-index: 1001;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
-        
-        /* Sticky Cart Button */
+
+        .viewer-close:hover {
+            background: var(--gpk-yellow);
+            color: var(--gpk-black);
+            transform: scale(1.1);
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
+        }
+
+        .viewer-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--gpk-yellow);
+            z-index: 1002;
+        }
+
+        .loader-spinner {
+            border: 5px solid var(--gpk-blue);
+            border-top: 5px solid var(--gpk-red);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--gpk-red);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            z-index: 1002;
+        }
+
+        /* Cart Button */
         .cart-button {
             position: fixed;
             bottom: 2rem;
@@ -158,15 +281,24 @@
             background: var(--gpk-blue);
             color: white;
             border: none;
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
         }
-        
+
+        .cart-button:hover {
+            transform: scale(1.1) rotate(10deg);
+            background: var(--gpk-red);
+        }
+
         .cart-count {
             position: absolute;
             top: -5px;
@@ -174,101 +306,171 @@
             background: var(--gpk-red);
             color: white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 2px solid white;
         }
-        
-        /* Footer Styles */
+
+        /* Footer */
         footer {
             background: var(--gpk-black);
             color: white;
-            padding: 2rem;
+            padding: 3rem 2rem 2rem;
             margin-top: auto;
         }
-        
+
         .footer-content {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .footer-section h3 {
             color: var(--gpk-yellow);
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
         }
-        
+
         .footer-section ul {
             list-style: none;
         }
-        
+
         .footer-section li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
-        
+
         .footer-section a {
             color: white;
             text-decoration: none;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
         }
-        
+
         .footer-section a:hover {
             color: var(--gpk-red);
         }
-        
+
         .social-links {
             display: flex;
             gap: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
-        
+
         .social-links a {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
+            display: inline-flex;
+            width: 45px;
+            height: 45px;
             background: var(--gpk-blue);
             border-radius: 50%;
-            display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
         }
-        
+
+        .social-links a:hover {
+            background: var(--gpk-red);
+            transform: translateY(-3px);
+        }
+
         .copyright {
             text-align: center;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.2rem;
+            }
+
+            .card-grid, .sets-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+
+            .card-container {
+                height: 320px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .card-grid, .sets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-button {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <div class="logo">GPK ULTRA</div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="cards">CARDS</button>
+            <button class="nav-tab" data-tab="sets">SETS</button>
+        </div>
     </header>
-    
-    <div class="card-grid" id="cardGrid">
-        <!-- Cards will be injected here by JavaScript -->
+
+    <div id="cards-tab" class="tab-content active">
+        <div class="card-grid" id="cardGrid">
+            <!-- Cards injected here -->
+        </div>
     </div>
-    
+
+    <div id="sets-tab" class="tab-content">
+        <div class="sets-grid" id="setsGrid">
+            <!-- Sets injected here -->
+        </div>
+    </div>
+
     <button class="cart-button">
         🛒
         <span class="cart-count">0</span>
     </button>
-    
-    <div id="webgl-container">
-        <button id="webgl-close">X CLOSE</button>
-        <canvas id="webgl-canvas"></canvas>
+
+    <div id="card-viewer" class="viewer">
+        <button class="viewer-close">✕ CLOSE</button>
+        <canvas id="card-canvas"></canvas>
     </div>
-    
+
+    <div id="book-viewer" class="viewer">
+        <button class="viewer-close">✕ CLOSE</button>
+        <canvas id="book-canvas"></canvas>
+    </div>
+
     <footer>
         <div class="footer-content">
             <div class="footer-section">
@@ -281,7 +483,7 @@
                     <a href="#" aria-label="YouTube">▶️</a>
                 </div>
             </div>
-            
+
             <div class="footer-section">
                 <h3>Quick Links</h3>
                 <ul>
@@ -291,7 +493,7 @@
                     <li><a href="#">Collection Tracker</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-section">
                 <h3>Legal</h3>
                 <ul>
@@ -301,7 +503,7 @@
                     <li><a href="#">Returns</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-section">
                 <h3>Contact</h3>
                 <ul>
@@ -312,272 +514,363 @@
                 </ul>
             </div>
         </div>
-        
+
         <div class="copyright">
-            <p>&copy; 2023 GPK ULTRA Collector's Hub. All rights reserved. Garbage Pail Kids is a trademark of The Topps Company.</p>
+            <p>&copy; 2026 GPK ULTRA Collector's Hub. All rights reserved. Garbage Pail Kids is a trademark of The Topps Company.</p>
         </div>
     </footer>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
     <script>
-        // Extended GPK Card Data (10 classic cards)
-        const gpkCards = [
-            {
-                id: 1,
-                title: "OS1 Custom Pack",
-                series: 1,
-                number: "",
-                year: 1985,
-                imageUrl: "PompaPaulie.png", // Changed to full URL
-                value: 125.00, // Added value
-                backImage: "20250428204923.png"
-            },
-            {
-                id: 2,
-                title: "OS2 Custom Wrapper",
-                series: 2,
-                number: "",
-                year: 1985,
-                imageUrl: "os2_custom_wrapper.jpg", // Changed to full URL
-                value: 85.50, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 3,
-                title: "OS3 Custom Wrapper",
-                series: 3,
-                number: "",
-                year: 1986,
-                imageUrl: "os3_custom_wrapper.jpg", // Changed to full URL
-                value: 65.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 4,
-                title: "OS4 Custom Wrapper",
-                series: 4,
-                number: "",
-                year: 1986,
-                imageUrl: "os4_custom_wrapper.jpg", // Changed to full URL
-                value: 150.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 5,
-                title: "OS5 Custom Wrapper",
-                series: 5,
-                number: "",
-                year: 1986,
-                imageUrl: "os5_custom_wrapper.jpg", // Changed to full URL
-                value: 75.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 6,
-                title: "OS6 Custom Wrapper",
-                series: 6,
-                number: "",
-                year: 1986,
-                imageUrl: "Os6_custom_wrapper.png", // Changed to full URL
-                value: 95.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 7,
-                title: "OS7 Custom Wrapper",
-                series: 7,
-                number: "",
-                year: 1986,
-                imageUrl: "OS7_customWrapper.png", // Changed to full URL
-                value: 110.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            
-                
-            {
-                id: 9,
-                title: "OS9 Custom Wrapper",
-                series: 9,
-                number: "",
-                year: 1987,
-                imageUrl: "Series9_customWrapper.png", // Changed to full URL
-                value: 70.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            },
-            {
-                id: 10,
-                title: "OS10 Custom Wrapper",
-                series: 10,
-                number: "",
-                year: 1987,
-                imageUrl: "Os10_custom_wrapper.png", // Changed to full URL
-                value: 90.00, // Added value
-                backImage: "https://i.imgur.com/5X5w0Wq.png"
-            }
-        ];
-        
-        // DOM Elements
-        const cardGrid = document.getElementById('cardGrid');
-        const webglContainer = document.getElementById('webgl-container');
-        const webglClose = document.getElementById('webgl-close');
-        const cartCount = document.querySelector('.cart-count');
-        
-        // Three.js Variables
-        let scene, camera, renderer, cardMesh;
-        
-        // Initialize the card grid
-        function initCardGrid() {
-            cardGrid.innerHTML = '';
-            
-            gpkCards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card-container';
-                cardElement.innerHTML = `
-                    <div class="card-face card-front">
-                        <div class="card-image" style="background-image: url('${card.imageUrl}')"></div>
-                        <div class="card-info">
-                            <h3 class="card-title">${card.title}</h3>
-                            <p>Series ${card.series} • ${card.number} • $${card.value.toFixed(2)}</p>
-                        </div>
-                    </div>
-                    <div class="card-face card-back">
-                        <div class="card-image" style="background-image: url('${card.backImage}')"></div>
-                    </div>
-                `;
-                
-                cardElement.addEventListener('click', () => {
-                    cardElement.classList.toggle('flipped');
-                    // Open WebGL viewer on double click
-                    setTimeout(() => {
-                        if(cardElement.classList.contains('flipped')) {
-                            initWebGLViewer(card);
-                        }
-                    }, 400);
-                });
-                
-                cardGrid.appendChild(cardElement);
-            });
-        }
-        
-        // Initialize WebGL Viewer
-        function initWebGLViewer(card) {
-            webglContainer.style.display = 'flex';
-            
-            // Set up Three.js scene
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ 
-                canvas: document.getElementById('webgl-canvas'), 
-                antialias: true,
-                preserveDrawingBuffer: true // Helps with texture loading
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            
-            // Add lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(1, 1, 1);
-            scene.add(directionalLight);
-            
-            // Create card geometry
-            const geometry = new THREE.PlaneGeometry(3, 4);
-            
-            // Load texture with error handling
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(
-                card.imageUrl,
-                (texture) => {
-                    const material = new THREE.MeshStandardMaterial({
-                        map: texture,
-                        roughness: 0.3,
-                        metalness: 0.1
-                    });
-                    
-                    if (cardMesh) {
-                        scene.remove(cardMesh);
-                    }
-                    
-                    cardMesh = new THREE.Mesh(geometry, material);
-                    scene.add(cardMesh);
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== DATA ==========
+            const gpkCards = [
+                {
+                    id: 1,
+                    title: "OS1 Custom Pack",
+                    series: 1,
+                    number: "",
+                    year: 1985,
+                    imageUrl: "PompaPaulie.png",
+                    backImage: "20250428204923.png",
+                    value: 125.00
                 },
-                undefined, // Progress callback (optional)
-                (error) => {
-                    console.error('Error loading texture:', error);
-                    // Fallback to a default material if texture fails to load
-                    const material = new THREE.MeshStandardMaterial({
-                        color: 0xffffff,
-                        roughness: 0.3,
-                        metalness: 0.1
-                    });
-                    
-                    if (cardMesh) {
-                        scene.remove(cardMesh);
-                    }
-                    
-                    cardMesh = new THREE.Mesh(geometry, material);
-                    scene.add(cardMesh);
+                {
+                    id: 2,
+                    title: "OS2 Custom Wrapper",
+                    series: 2,
+                    number: "",
+                    year: 1985,
+                    imageUrl: "os2_custom_wrapper.jpg",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 85.50
+                },
+                {
+                    id: 3,
+                    title: "OS3 Custom Wrapper",
+                    series: 3,
+                    number: "",
+                    year: 1986,
+                    imageUrl: "os3_custom_wrapper.jpg",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 65.00
+                },
+                {
+                    id: 4,
+                    title: "OS4 Custom Wrapper",
+                    series: 4,
+                    number: "",
+                    year: 1986,
+                    imageUrl: "os4_custom_wrapper.jpg",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 150.00
+                },
+                {
+                    id: 5,
+                    title: "OS5 Custom Wrapper",
+                    series: 5,
+                    number: "",
+                    year: 1986,
+                    imageUrl: "os5_custom_wrapper.jpg",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 75.00
+                },
+                {
+                    id: 6,
+                    title: "OS6 Custom Wrapper",
+                    series: 6,
+                    number: "",
+                    year: 1986,
+                    imageUrl: "Os6_custom_wrapper.png",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 95.00
+                },
+                {
+                    id: 7,
+                    title: "OS7 Custom Wrapper",
+                    series: 7,
+                    number: "",
+                    year: 1986,
+                    imageUrl: "OS7_customWrapper.png",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 110.00
+                },
+                {
+                    id: 9,
+                    title: "OS9 Custom Wrapper",
+                    series: 9,
+                    number: "",
+                    year: 1987,
+                    imageUrl: "Series9_customWrapper.png",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 70.00
+                },
+                {
+                    id: 10,
+                    title: "OS10 Custom Wrapper",
+                    series: 10,
+                    number: "",
+                    year: 1987,
+                    imageUrl: "Os10_custom_wrapper.png",
+                    backImage: "https://i.imgur.com/5X5w0Wq.png",
+                    value: 90.00
                 }
-            );
-            
-            camera.position.z = 5;
-            
-            // Add controls
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableZoom = true;
-            controls.enablePan = false;
-            
-            // Animation loop
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
+            ];
+
+            const gpkSets = [
+                {
+                    id: "series1",
+                    title: "Original Series 1",
+                    year: 1985,
+                    coverImage: "assets/sets/series1_cover.jpg",
+                    pages: [
+                        "assets/sets/series1/page1.jpg",
+                        "assets/sets/series1/page2.jpg"
+                    ]
+                }
+            ];
+
+            // ========== STATE ==========
+            let state = {
+                cartItems: 0,
+                threeJS: {
+                    card: { scene: null, camera: null, renderer: null, mesh: null },
+                    book: { scene: null, camera: null, renderer: null, meshes: [] }
+                }
+            };
+
+            // ========== DOM ELEMENTS ==========
+            const elements = {
+                cardGrid: document.getElementById('cardGrid'),
+                setsGrid: document.getElementById('setsGrid'),
+                cardViewer: document.getElementById('card-viewer'),
+                bookViewer: document.getElementById('book-viewer'),
+                cardCanvas: document.getElementById('card-canvas'),
+                bookCanvas: document.getElementById('book-canvas'),
+                cartCount: document.querySelector('.cart-count'),
+                navTabs: document.querySelectorAll('.nav-tab'),
+                tabContents: document.querySelectorAll('.tab-content')
+            };
+
+            // ========== INIT ==========
+            function init() {
+                setupTabs();
+                initCardGrid();
+                initSetsGrid();
+                setupCart();
+                setupViewerCloseButtons();
             }
-            
-            animate();
-            
-            // Handle window resize
-            function handleResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
+
+            // ========== TABS ==========
+            function setupTabs() {
+                elements.navTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        elements.navTabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+
+                        elements.tabContents.forEach(c => c.classList.remove('active'));
+                        const tabId = tab.dataset.tab + '-tab';
+                        document.getElementById(tabId).classList.add('active');
+                    });
+                });
+            }
+
+            // ========== CARD GRID ==========
+            function initCardGrid() {
+                elements.cardGrid.innerHTML = '';
+
+                gpkCards.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card-container';
+                    cardElement.innerHTML = `
+                        <div class="card-face card-front">
+                            <div class="card-image" style="background-image: url('${card.imageUrl}')"></div>
+                            <div class="card-info">
+                                <h3 class="card-title">${card.title}</h3>
+                                <p>Series ${card.series} • $${card.value.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="card-image" style="background-image: url('${card.backImage}')"></div>
+                        </div>
+                    `;
+
+                    cardElement.addEventListener('click', () => {
+                        cardElement.classList.toggle('flipped');
+                        setTimeout(() => {
+                            if (cardElement.classList.contains('flipped')) {
+                                showCardViewer(card);
+                            }
+                        }, 400);
+                    });
+
+                    elements.cardGrid.appendChild(cardElement);
+                });
+            }
+
+            // ========== SETS GRID ==========
+            function initSetsGrid() {
+                elements.setsGrid.innerHTML = '';
+
+                gpkSets.forEach(set => {
+                    const setElement = document.createElement('div');
+                    setElement.className = 'set-container';
+                    setElement.innerHTML = `
+                        <img src="${set.coverImage}" alt="${set.title}" class="set-cover">
+                    `;
+                    setElement.addEventListener('click', () => showBookViewer(set));
+                    elements.setsGrid.appendChild(setElement);
+                });
+            }
+
+            // ========== 3D CARD VIEWER ==========
+            function showCardViewer(card) {
+                showLoader(elements.cardViewer);
+                elements.cardViewer.classList.add('active');
+
+                if (state.threeJS.card.renderer) {
+                    cleanupThreeJS('card');
+                }
+
+                const { scene, camera, renderer } = initThreeJS('card', elements.cardCanvas);
+                state.threeJS.card = { scene, camera, renderer };
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(1, 1, 1);
+                scene.add(directionalLight);
+
+                new THREE.TextureLoader().load(
+                    card.imageUrl,
+                    texture => {
+                        const geometry = new THREE.PlaneGeometry(3, 4);
+                        const material = new THREE.MeshStandardMaterial({
+                            map: texture,
+                            roughness: 0.3,
+                            metalness: 0.1
+                        });
+
+                        const mesh = new THREE.Mesh(geometry, material);
+                        scene.add(mesh);
+                        state.threeJS.card.mesh = mesh;
+
+                        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                        controls.enableZoom = true;
+                        controls.enablePan = false;
+
+                        camera.position.z = 5;
+                        animate('card');
+                        hideLoader(elements.cardViewer);
+                    },
+                    undefined,
+                    error => handleViewerError(error, elements.cardViewer)
+                );
+            }
+
+            // ========== 3D BOOK VIEWER ==========
+            function showBookViewer(set) {
+                showLoader(elements.bookViewer);
+                elements.bookViewer.classList.add('active');
+
+                if (state.threeJS.book.renderer) {
+                    cleanupThreeJS('book');
+                }
+
+                const { scene, camera, renderer } = initThreeJS('book', elements.bookCanvas);
+                state.threeJS.book = { scene, camera, renderer };
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(1, 1, 1);
+                scene.add(directionalLight);
+
+                camera.position.z = 8;
+                animate('book');
+                hideLoader(elements.bookViewer);
+            }
+
+            // ========== UTILITIES ==========
+            function initThreeJS(type, canvas) {
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
                 renderer.setSize(window.innerWidth, window.innerHeight);
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                return { scene, camera, renderer };
             }
-            
-            window.addEventListener('resize', handleResize);
-            
-            // Clean up event listener when viewer is closed
-            webglClose.addEventListener('click', () => {
-                window.removeEventListener('resize', handleResize);
-                webglContainer.style.display = 'none';
-                if(renderer) {
+
+            function animate(type) {
+                const { scene, camera, renderer } = state.threeJS[type];
+
+                function render() {
+                    requestAnimationFrame(render);
+                    renderer.render(scene, camera);
+                }
+                render();
+            }
+
+            function cleanupThreeJS(type) {
+                const { renderer } = state.threeJS[type];
+                if (renderer) {
                     renderer.dispose();
                 }
-            }, { once: true });
-        }
-        
-        // Close WebGL Viewer
-        webglClose.addEventListener('click', () => {
-            webglContainer.style.display = 'none';
-            // Clean up Three.js
-            if(renderer) {
-                renderer.dispose();
             }
+
+            function showLoader(container) {
+                let loader = container.querySelector('.viewer-loader');
+                if (!loader) {
+                    loader = document.createElement('div');
+                    loader.className = 'viewer-loader';
+                    loader.innerHTML = `
+                        <div class="loader-spinner"></div>
+                        <p>LOADING...</p>
+                    `;
+                    container.appendChild(loader);
+                }
+                loader.style.display = 'block';
+            }
+
+            function hideLoader(container) {
+                const loader = container.querySelector('.viewer-loader');
+                if (loader) loader.style.display = 'none';
+            }
+
+            function handleViewerError(error, container) {
+                console.error('Error:', error);
+                hideLoader(container);
+            }
+
+            function setupCart() {
+                document.querySelector('.cart-button').addEventListener('click', () => {
+                    state.cartItems++;
+                    elements.cartCount.textContent = state.cartItems;
+                });
+            }
+
+            function setupViewerCloseButtons() {
+                document.querySelectorAll('.viewer-close').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const viewer = e.target.closest('.viewer');
+                        const type = viewer.id.includes('card') ? 'card' : 'book';
+                        viewer.classList.remove('active');
+                        cleanupThreeJS(type);
+                    });
+                });
+            }
+
+            init();
         });
-        
-        // Initialize cart counter
-        let cartItems = 0;
-        
-        // Sample add to cart functionality
-        function addToCart(cardId) {
-            cartItems++;
-            cartCount.textContent = cartItems;
-            // Add actual cart logic here
-        }
-        
-        // Initialize the app
-        initCardGrid();
     </script>
 </body>
 </html>
